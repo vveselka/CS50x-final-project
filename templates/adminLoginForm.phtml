@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}{{ title }}{% endblock %}
+{% block content %}
+
+    <div class="container">
+        <h3>Login form</h3>
+        <form class="form-horizontal" id="loginForm" role="form">
+            <div class="form-group">
+                <div class="col-xs-8 col-lg-4">
+                    <input id="userName" type="text"  class="form-control" name="username" placeholder="Username" autofocus >
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-xs-8 col-lg-4">
+                    <input id="password" type="password" class="form-control " name="pwd" placeholder="Password" >
+                </div>
+            </div>
+            <div class="form-group"> 
+                <div class="col-xs-8">
+                    <button type="submit" class="btn">Log In</button>
+                </div>
+            </div>
+            <span class="errorMess"></span>
+        </form>
+    </div>
+
+    <script type="text/javascript">
+        $(function() {
+            $("#loginForm").submit(function(e) {
+                e.preventDefault();
+                if ($("#userName").val() == "") {
+                    $("#userName").addClass('addColorAnimation');
+                    fieldValidationAnimation($("#userName"));
+                    return false;
+                }
+                if ($("#password").val() == "") {
+                    $("#password").addClass('addColorAnimation');
+                    fieldValidationAnimation($("#password"));
+                    return false;
+                }
+                $.ajax({
+                    type: "POST",
+                    url: 'admin.php',
+                    data: $(this).serialize(),
+                    success: function(correctCredentials) {
+                        if (!correctCredentials) {
+                            showErrorMessage();
+                        } else {
+                            window.location='answers.php';
+                        } 
+                  }
+                 });
+            });
+
+            function showErrorMessage() {
+                $('.errorMess').html('Wrong login data. Try again').css('color', '#ad2323');
+                $("#password").val("");
+            }
+
+            function fieldValidationAnimation(el) {
+                var newone = el[0].cloneNode(true);
+                el[0].parentNode.replaceChild(newone, el[0]);
+            }
+        });
+    </script>
+    
+{% endblock %}

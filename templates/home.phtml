@@ -1,0 +1,193 @@
+{% extends "base.html" %}
+{% block title %}{{ title }}{% endblock %}
+{% block content %}
+
+{% if isAdmin == true %}
+<div class="linkToAdmin">
+    <a href="answers.php">ADMIN VIEW</a>
+</div>
+{% endif %}
+
+<header>
+    <div class="page-header header">
+            &#60;Question Point&#62;
+    </div>
+</header>
+
+    
+<div class="container">
+    <div class="addQuestionButton" title="Add question" data-toggle="modal" data-target="#addQuestionModal">
+        <a href="#">Ask Question</a>
+    </div>
+    <ul class="list-group">
+        {% for question in allQuestions %}
+            <li class="list-group-item qnaBlock" data-toggle="modal" data-target="#separateQuestionModal">
+                <div class="questionHeader"  data-question="{{ question.getQuestion() }}" data-Date="{{ question.getDate() }}"  data-answer="{{ question.getAnswer() }}" data-author="{{ question.getAuthorName() }}" >
+                    {{ question.getQuestion() }}
+                </div>
+                <div class="text-muted">
+                    {{ question.getDate() }}
+                </div>
+                <div class="questionAnswer">
+                    {% if(question.getAnswer() == NULL) %}
+                        <p style="color:#960404;">NO ANSWER YET</p>
+                    {% else %}
+                        <p class="module line-clamp">{{ question.getAnswer() }}</p>
+                    {% endif %}
+                </div>
+            </li>
+        {% endfor %}
+    </ul>
+</div>
+
+<div id="separateQuestionModal" class="modal">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-body">
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <div class="modal-question">
+                </div>
+                <div class="modal-date text-muted">
+                </div>
+                <div class="modal-answer">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div id='addQuestionModal' class='modal'>
+    <div class="modal-dialog modal-lg">
+        <div class='modal-content'>
+            <div class="modal-body">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <div class="modalTitle">
+                    Ask Question
+                </div>
+                <div class="addQuestionForm">
+                    <form id="addQuestionForm" method="POST">
+                        <div class="row form-group">
+                            <label for="q_name" class="col-xs-2 col-md-2 col-form-label text-muted">Name</label>
+                            <div class="col-sm-10 col-xs-7 col-md-10">
+                                <input type="text" class="form-control" name="userName" required autofocus>
+                            </div>
+                        </div>
+                        <div class="row form-group">
+                            <label for="q_email" class="col-xs-2 col-md-2  col-form-label text-muted">Email</label>
+                            <div class="col-sm-10 col-xs-7 col-md-10">
+                                <input type="email" class="form-control" name="userEmail" required>
+                            </div>
+                        </div>
+                        <div class="row form-group">
+                            <label for="q_question" class="col-xs-2 col-md-2  col-form-label text-muted">Question</label>
+                            <div class="col-sm-10 col-xs-7 col-md-10">
+                                <textarea class="form-control" rows="4" name="userQuestion" required></textarea>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <button type="submit" class="btn btn-primary addQuestionSubmitButton">Ask us</button>
+                        </div>
+                        <div class="clearfix"></div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    function getCurrDate() {
+        var monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+        var date = new Date();
+        var day = date.getDate();
+        var monthIndex = date.getMonth();
+        var year = date.getFullYear();
+        var finalResult = monthNames[monthIndex] + ' ' + day  + ', ' + year;
+        return finalResult;
+    }
+
+    $(".list-group").on('click', '.list-group-item.qnaBlock', function() {
+        var header = $(this).find(".questionHeader");
+        var autorName = $('<span>').addClass('authorName text-muted').text('  by ' + header.data('author'));
+        $(".modal-question").empty().append(header.data('question')).append(autorName);
+        $(".modal-date").empty().append(header.data('date'));
+        if(header.data('answer') === '') {
+            $(".modal-answer").css('color', '#960404').text('Waiting for responce');
+        } else {
+            $(".modal-answer").removeAttr('style').empty().append(header.data('answer'));
+        }
+    });
+
+    $('.addQuestionButton').click(function() {
+        $('#addQuestionModal').show();
+        $('#addQuestionForm').trigger('reset');
+        $("input[name='userName']").focus();
+    });
+
+    $('#addQuestionForm').submit(function(e) {
+        var request;
+        e.preventDefault();
+        var userName = $("input[name='userName']").val();
+        var userEmail = $("input[name = 'userEmail']").val();
+        var userQuestion = $("textarea[name = 'userQuestion']").val();
+        var inputs = $(this).find('input, textarea');
+        var serializedData = inputs.serialize();
+        inputs.prop('disabled', true);
+        request = $.ajax({
+            url: "saveQuestion.php",
+            type: "post",
+            data: serializedData
+        });
+
+        request.done(function(response, textStatus, jqXHR) {
+            $('#addQuestionModal').modal('toggle');
+           addQuestionToTheDOM(userQuestion, getCurrDate(), userName);
+        });
+
+        request.fail(function (jqXHR, textStatus, errorThrown){
+            console.error(
+                "Cannot save question " +
+                textStatus, errorThrown
+            );
+        });
+
+        request.always(function () {
+            inputs.prop("disabled", false);
+        });
+
+        function addQuestionToTheDOM(newQuestionText, date, author) {
+            var newQuestion = $('.list-group-item.qnaBlock').first().addClass('addedItem');
+            var questionHeader = $('<div>').addClass("questionHeader").attr({'data-question':newQuestionText, 'data-Date': date, 'data-toggle':'modal', 'data-answer': '', 'data-author': author, 'data-target':'#separateQuestionModal'}).text(newQuestionText);
+            var questionDate = $('<div>').addClass('text-muted').text(date);
+            var stubForAnswer = $('<div>').addClass('questionAnswer').append(($('<p>')).css('color', '#960404').text('NO ANSWER YET'));
+            newQuestion.append(questionHeader).append(questionDate).append(stubForAnswer);
+            $('ul.list-group').prepend(newQuestion);
+        }
+    });
+
+    function addLoader() {
+        var newItemForLoader = $('<li>').addClass("list-group-item qnaBlock");
+        newItemForLoader.append($('<div>').attr('id', 'loader'));
+        $('ul.list-group').prepend(newItemForLoader);
+    }
+
+    $(document).ajaxStart(function() {
+                addLoader();
+            })
+            .ajaxStop(function() {
+                $('#loader').remove();
+    });
+
+    $(document).ready(function() {
+        if ($(window).width() < 450 ) {
+            $("#addQuestionModal input[name='userName']").attr("placeholder","Name");
+            $("#addQuestionModal input[name='userEmail']").attr("placeholder","Email");
+            $("#addQuestionModal textarea[name='userQuestion']").attr("placeholder","Your question");
+            $('#addQuestionModal label').remove();
+        }
+    });
+
+</script>
+
+{% endblock %}

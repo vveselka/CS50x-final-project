@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block title %} {{title}} {% endblock %}
+
+{% block content %}
+
+
+<script>
+    $(function() {
+        $("#submitForm").click(function(e) {
+            $("#removeQuestionForm").submit();
+        });
+
+        $("#removeQuestionModal").on('show.bs.modal', function(e) {
+            var id = $(e.relatedTarget).data('questionid');
+            $(".modal-body input").val(id);
+        });
+
+         $('textarea.expand').focus(function () {
+            $(this).animate({ height: "4em"}, 300);
+        });
+    })
+</script>
+
+
+<nav class="navbar navbar-default">
+        <div class="container-fluid">
+            <ul class="nav navbar-nav">
+                <li class="active"><a href="#">Admin panel</a></li>
+                <li><a href="index.php">Main View</a></li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                <li><a href="logout.php">Log Out</a></li>
+            </ul>
+         </div>
+</nav>
+
+<table class="table">
+    <th>Author userName</th>
+    <th>Question</th>
+    <th>Answer</th>
+    <th>Email</th>
+    <th>Question Date</th>
+    <th>Remove</th>
+
+    {% for d in questionsWithoutAnswer %}
+    <tr>
+        <td>{{ d.getAuthorName() }}</td>
+        <td>{{ d.getQuestion() }}</td>
+        <td>
+            <form method="POST" action="saveAnswer.php">
+                <div class='form-group'>
+                    <textarea class="form-control expend" type="text" style="height:6em;" name="answer" value="" required></textarea>
+                    <input class="form-control" type="hidden" name="id" value="{{ d.getId() }}">
+                </div>
+                <button class="btn btn-primary" type="submit">Save</button>
+            </form>
+        </td>
+        <td>{{ d.getEmail() }}</td>
+        <td>{{ d.getDate() }}</td>
+        <td><a href="#removeQuestionModal" style="color:#8C4242;" data-toggle="modal" data-questionid="{{ d.getId() }}">Remove question</a></td>
+    </tr>
+    {% endfor %}
+</table>
+
+<div class="modal fade" id="removeQuestionModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">
+                      &times;
+                </button>
+                <h4 class="modal-title">
+                    Remove question
+                </h4>
+            </div>
+            <div class ="modal-body">
+                <form id="removeQuestionForm" method="post" action="removeQuestion.php">
+                    <p>Confirm that you want to delete question</p>
+                    <input type="hidden" name="questionId" value="">
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal">
+                    Close
+                </button>
+                <button type ="button" id="submitForm" class="btn btn-primary">
+                   Remove
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
