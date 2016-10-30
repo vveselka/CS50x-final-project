@@ -108,12 +108,19 @@ textarea {
 
 .btn:hover {
     background-color: #777;
+    border-color: #777;
     opacity: 0.7;
     color: white;
 }
 
 .btn:active {
     background-color: #777;
+    border-color: #777;
+}
+
+.btn:focus {
+    background-color: #777;
+    border-color: #777;
 }
 
 .expand {

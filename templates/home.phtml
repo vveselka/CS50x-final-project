@@ -70,19 +70,19 @@
                         <div class="row form-group">
                             <label for="q_name" class="col-xs-2 col-md-2 col-form-label text-muted">Name</label>
                             <div class="col-sm-10 col-xs-7 col-md-10">
-                                <input type="text" class="form-control" name="userName" required autofocus>
+                                <input type="text" class="form-control" name="userName"  autofocus>
                             </div>
                         </div>
                         <div class="row form-group">
                             <label for="q_email" class="col-xs-2 col-md-2  col-form-label text-muted">Email</label>
                             <div class="col-sm-10 col-xs-7 col-md-10">
-                                <input type="email" class="form-control" name="userEmail" required>
+                                <input type="email" class="form-control" name="userEmail" >
                             </div>
                         </div>
                         <div class="row form-group">
                             <label for="q_question" class="col-xs-2 col-md-2  col-form-label text-muted">Question</label>
                             <div class="col-sm-10 col-xs-7 col-md-10">
-                                <textarea class="form-control" rows="4" name="userQuestion" required></textarea>
+                                <textarea class="form-control" rows="4" name="userQuestion" ></textarea>
                             </div>
                         </div>
                         <div class="row">
@@ -131,6 +131,10 @@
         var userName = $("input[name='userName']").val();
         var userEmail = $("input[name = 'userEmail']").val();
         var userQuestion = $("textarea[name = 'userQuestion']").val();
+        if(checkInputIsEmpty($("input[name='userName']")) || checkInputIsEmpty($("input[name = 'userEmail']")) ||
+           checkInputIsEmpty($("textarea[name = 'userQuestion']"))) {
+            return false;
+        }
         var inputs = $(this).find('input, textarea');
         var serializedData = inputs.serialize();
         inputs.prop('disabled', true);
@@ -187,6 +191,20 @@
             $('#addQuestionModal label').remove();
         }
     });
+
+    function fieldValidationAnimation(el) {
+        var newone = el[0].cloneNode(true);
+        el[0].parentNode.replaceChild(newone, el[0]);
+    }
+    
+    function checkInputIsEmpty(inputSelector) {
+        var inputValue = inputSelector.val();
+        if(inputValue === "") {
+            inputSelector.addClass('addColorAnimation');
+            fieldValidationAnimation(inputSelector);
+            return true;
+        } return false;
+    }
 
 </script>
 
